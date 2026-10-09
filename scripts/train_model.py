@@ -4,10 +4,13 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 import joblib
 import os
+from pathlib import Path
 
 # Paths
-PROCESSED_DATA_PATH = "data\\flood_processed.csv"
-MODEL_PATH = "data\\flood_model.pkl"
+BASE_DIR = Path(__file__).resolve().parent.parent   
+PROCESSED_DATA_PATH = BASE_DIR / "data" / "flood_processed.csv"
+MODEL_PATH = BASE_DIR / "app" / "data" / "flood_model.pkl"
+
 
 # Load processed data
 df = pd.read_csv(PROCESSED_DATA_PATH)
