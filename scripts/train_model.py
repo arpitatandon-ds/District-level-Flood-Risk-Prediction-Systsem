@@ -9,7 +9,7 @@ from pathlib import Path
 # Paths
 BASE_DIR = Path(__file__).resolve().parent.parent   
 PROCESSED_DATA_PATH = BASE_DIR / "data" / "flood_processed.csv"
-MODEL_PATH = BASE_DIR / "app" / "data" / "flood_model.pkl"
+MODEL_PATH = BASE_DIR / "app" / "data" / "flood_model_small.pkl"
 
 
 # Load processed data

@@ -247,7 +247,7 @@ except Exception as exc:
         )
     else:
         st.error(
-            f"Model file not found at: {MODEL_PATH}. Put flood_model.pkl in the "
+            f"Model file not found at: {MODEL_PATH}. Put flood_model_small.pkl in the "
             "'data' folder next to the app, or set the Drive file to 'Anyone with the link'."
         )
     st.exception(exc)

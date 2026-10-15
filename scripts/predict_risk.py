@@ -5,7 +5,7 @@ import joblib
 import os
 
 # Paths
-MODEL_PATH = "data\\flood_model.pkl"
+MODEL_PATH = "data\\flood_model_small.pkl"
 
 # Load trained model
 model = joblib.load(MODEL_PATH)
