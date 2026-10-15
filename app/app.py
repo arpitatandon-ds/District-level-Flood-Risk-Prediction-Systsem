@@ -262,46 +262,85 @@ tab_single, tab_batch, tab_report, tab_chat = st.tabs(
 # ---- Tab 1: single district ------------------------------------------------
 with tab_single:
     st.subheader("Single District Prediction")
+
     with st.form("single_form"):
-        values = {col: st.slider(col, 0.0, 1.0, 0.5) for col in features}
         district = st.text_input("District Name")
-        lat = st.number_input("Latitude", value=20.5937)
-        lon = st.number_input("Longitude", value=78.9629)
+
+        st.caption(
+            "Adjust the risk factors below. Keep values within the 0–1 range."
+        )
+
+        with st.expander("Advanced Risk Factors", expanded=False):
+            values = {
+                col: st.slider(
+                    col,
+                    min_value=0.0,
+                    max_value=1.0,
+                    value=0.5,
+                    key=f"single_{col}",
+                )
+                for col in features
+            }
+
+        st.subheader("Location")
+        lat = st.number_input(
+            "Latitude",
+            min_value=-90.0,
+            max_value=90.0,
+            value=20.5937,
+        )
+        lon = st.number_input(
+            "Longitude",
+            min_value=-180.0,
+            max_value=180.0,
+            value=78.9629,
+        )
+
         submitted = st.form_submit_button("Predict")
 
+    # Run prediction after the form is submitted
     if submitted:
         if not district.strip():
             st.warning("Please enter a district name.")
         else:
-            row = pd.DataFrame(values, index=[0])
-            score = float(predict_scores(model, row)[0])
-            label = to_risk_label(score)
+            try:
+                # Prepare all 20 model features
+                input_data = pd.DataFrame(
+                    [{col: values[col] for col in features}]
+                )
 
-            record = row.assign(District=district.strip(), Latitude=lat, Longitude=lon,
-                                RiskScore=round(score, 3), PredictedRisk=label)
-            st.session_state.predictions = pd.concat(
-                [st.session_state.predictions, record], ignore_index=True
-            )
+                # Predict flood risk score
+                score = float(model.predict(input_data)[0])
+                risk = to_risk_label(score)
 
-            st.subheader("Predicted Flood Risk")
-            st.markdown(
-                f"{RISK_ICONS[label]} **:{RISK_COLORS[label]}[{label}]** (score {score:.2f})"
-            )
+                # Display results
+                st.subheader("Prediction Result")
+                st.metric("Flood Risk Score", f"{score:.2%}")
 
-            if hasattr(model, "feature_importances_"):
-                importance = pd.Series(model.feature_importances_, index=features).sort_values()
-                fig, ax = plt.subplots(figsize=(8, 4))
-                ax.barh(importance.index, importance.values, color="teal")
-                ax.set_title("Feature Importance")
-                st.pyplot(fig)
+                if risk == "High":
+                    st.error(f"🔴 Flood Risk Level: {risk}")
+                elif risk == "Medium":
+                    st.warning(f"🟠 Flood Risk Level: {risk}")
+                else:
+                    st.success(f"🟢 Flood Risk Level: {risk}")
 
-            if is_admin and label == "High":
-                st.session_state.pending_alert = f"High flood risk in {district.strip()}"
+                # Save prediction for the report tab
+                result = {
+                    "District": district.strip(),
+                    "Latitude": lat,
+                    "Longitude": lon,
+                    "FloodProbability": score,
+                    "PredictedRisk": risk,
+                }
 
-    if is_admin and st.session_state.get("pending_alert"):
-        st.warning(st.session_state.pending_alert)
-        if st.button("Send alert (SMS + email)"):
-            show_alert_status(send_alerts(st.session_state.pop("pending_alert")))
+                new_record = pd.DataFrame([result])
+                st.session_state.predictions = pd.concat(
+                    [st.session_state.predictions, new_record],
+                    ignore_index=True,
+                )
+
+            except Exception as exc:
+                st.error(f"Prediction failed: {exc}")
 
 # ---- Tab 2: batch CSV ------------------------------------------------------
 with tab_batch:
