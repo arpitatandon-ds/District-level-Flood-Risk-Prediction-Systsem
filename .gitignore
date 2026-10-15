@@ -12,9 +12,6 @@ __pycache__/
 venv/
 .venv/
 
-# Model file (train_model.py se dobara ban jaati hai)
-*.pkl
-
 # Jupyter / OS
 .ipynb_checkpoints/
 .DS_Store

@@ -28,8 +28,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).parent
 # Looks for the model in app/data first, then in the project-level data folder
 MODEL_CANDIDATES = [
-    BASE_DIR / "data" / "flood_model.pkl",
-    BASE_DIR.parent / "data" / "flood_model.pkl",
+    BASE_DIR / "data" / "flood_model_small.pkl",
 ]
 MODEL_PATH = next((p for p in MODEL_CANDIDATES if p.exists()), MODEL_CANDIDATES[0])
 USER_FILE = BASE_DIR / "users.json"
